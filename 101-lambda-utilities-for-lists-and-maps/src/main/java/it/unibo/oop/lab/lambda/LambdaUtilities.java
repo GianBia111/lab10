@@ -1,9 +1,12 @@
 package it.unibo.oop.lab.lambda;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -61,7 +64,12 @@ public final class LambdaUtilities {
         /*
          * Suggestion: consider Optional.filter
          */
-        return null;
+        
+        return list.stream()
+            .map(el -> Optional.of(el))
+            .map(el -> el.filter(pre))
+            .toList();
+                
     }
 
     /**
@@ -80,7 +88,14 @@ public final class LambdaUtilities {
         /*
          * Suggestion: consider Map.merge
          */
-        return null;
+        final Map<R, Set<T>> map = new HashMap<>();
+        list.forEach(t -> {
+            map.merge(op.apply(t), new HashSet<>(Arrays.asList(t)), (t1, t2) -> {
+                t1.addAll(t2);
+                return t1;
+            });
+        });
+        return map;
     }
 
     /**
@@ -96,12 +111,18 @@ public final class LambdaUtilities {
      *         by the supplier
      */
     public static <K, V> Map<K, V> fill(final Map<K, Optional<V>> map, final Supplier<V> def) {
-        /*
-         * Suggestion: consider Optional.orElse
-         *
-         * Keep in mind that a map can be iterated through its forEach method
-         */
-        return null;
+        final Map<K,V> _result = new HashMap<K,V>();
+        map.forEach((k,v)->{
+            K key=k;
+            if(!v.isPresent()){
+                _result.put(key, def.get());
+            }else{
+                _result.put(key, v.get());
+            }
+            
+        });
+
+        return _result;
     }
 
     /**
@@ -110,28 +131,12 @@ public final class LambdaUtilities {
      */
     @SuppressWarnings("PMD.SystemPrintln")
     public static void main(final String[] args) {
-        final List<Integer> li = IntStream.range(1, 8).mapToObj(i -> Integer.valueOf(i)).collect(Collectors.toList());
-        System.out.println(dup(li, x -> x + 100));
-        /*
-         * [1, 101, 2, 102, 3, 103, 4, 104, 5, 105, 6, 106, 7, 107]
-         */
-        System.out.println(group(li, x -> x % 2 == 0 ? "even" : "odd"));
-        /*
-         * {odd=[1, 3, 5, 7], even=[2, 4, 6]}
-         */
-        final List<Optional<Integer>> opt = optFilter(li, x -> x % 3 == 0);
-        System.out.println(opt);
-        /*
-         * [Optional.empty, Optional.empty, Optional[3], Optional.empty,
-         * Optional.empty, Optional[6], Optional.empty]
-         */
-        final Map<Integer, Optional<Integer>> map = new HashMap<>();
-        for (int i = 0; i < opt.size(); i++) {
-            map.put(i, opt.get(i));
-        }
-        System.out.println(fill(map, () -> (int) (-Math.random() * 10)));
-        /*
-         * {0=-2, 1=-7, 2=3, 3=-3, 4=-7, 5=6, 6=-3}
-         */
+        
+        Map<String,Set<Integer>> res= LambdaUtilities.group(List.of(1, 2, 3, 4, 5), x -> x % 2 == 0 ? "even" : "odd");
+        res.forEach((k,v)->{
+            System.out.println(k);
+            System.out.println("\t");
+            v.stream().peek(elem -> System.out.println(elem));
+        });
     }
 }
