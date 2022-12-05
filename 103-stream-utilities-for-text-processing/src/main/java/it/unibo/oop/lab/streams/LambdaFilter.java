@@ -6,7 +6,10 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -33,6 +36,7 @@ import javax.swing.JTextArea;
 public final class LambdaFilter extends JFrame {
 
     private static final long serialVersionUID = 1760990730218643730L;
+    private static final String SEPARATORS = "(\\s|\\p{Punct})+";
 
     private enum Command {
         /**
@@ -41,8 +45,9 @@ public final class LambdaFilter extends JFrame {
         IDENTITY("No modifications", Function.identity()),
         LOWERCASE("Convert to lowercase", (text)-> text.toLowerCase()),
         COUNT_CHARS("Count the number of chars", (text)-> ""+text.chars().count()),
-        COUNT_LINES("Count the number of lines", (text)->""),
-        ALPHABETICAL_ORDER("Order", (text)->"");
+        COUNT_LINES("Count the number of lines", (text)->""+text.lines().count()),
+        ALPHABETICAL_ORDER("Order", (text)-> Arrays.stream(text.split(SEPARATORS)).sorted().collect(Collectors.joining("\n"))),
+        WORD_CHARS_COUNT("Word CHars Count", (text)-> Arrays.stream(text.split(SEPARATORS)).map(word -> word+" -> "+word.chars().count()).collect(Collectors.joining("\n")));
 
 
         private final String commandName;
